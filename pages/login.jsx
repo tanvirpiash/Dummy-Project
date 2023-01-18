@@ -8,29 +8,19 @@ export default function Login() {
       handleSubmit,
       formState: { errors },
    } = useForm();
-   const onSubmit = async ({ name, email, phone }) => {
+   const onSubmit = async ({ phone, email }) => {
       const { data, error } = await axios.post('api/authentication', {
-         name,
          phone,
          email,
       });
+      console.log(data);
       data.status == 'ok' && router.push('/dashboard');
    };
-
    return (
       <form onSubmit={handleSubmit(onSubmit)}>
-         <label htmlFor='name'>
-            {' '}
-            Name:
-            <input id='name' type='name' {...register('name', { required: true })} />
-            {errors.exampleRequired && <span>This field is required</span>}
-         </label>
-         <br />
-         <br />
          <label htmlFor='phone'>
             Phone:
             <input id='phone' type='tel' {...register('phone', { required: true })} />
-            {errors.exampleRequired && <span>This field is required</span>}
          </label>
          <br />
          <br />
@@ -38,7 +28,6 @@ export default function Login() {
             {' '}
             Email:
             <input id='email' type='email' {...register('email', { required: true })} />
-            {errors.exampleRequired && <span>This field is required</span>}
          </label>
          <br />
          <br />
