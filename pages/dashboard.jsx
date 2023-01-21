@@ -1,9 +1,24 @@
-import { getCookies } from 'cookies-next';
+import Link from 'next/link';
 import { userAuth } from '../lib/userAuth';
-const dashboard = ({ name, email }) => {
+const dashboard = ({ userinfo }) => {
    return (
       <div>
-         welcome {name} <br /> Email {email}
+         {Object.keys(userinfo).map((e, index) => {
+            return (
+               <div key={`${typeof e}-${index}`}>
+                  <Link href={`/user/${e}`}>User{index}</Link>
+                  {userinfo[e].map((e, index) => {
+                     return (
+                        <div key={`inner${typeof e}-${index}`}>
+                           {e[0]}
+                           <br />
+                           {e[1]}
+                        </div>
+                     );
+                  })}
+               </div>
+            );
+         })}
       </div>
    );
 };
@@ -11,14 +26,24 @@ const dashboard = ({ name, email }) => {
 export default dashboard;
 
 export async function getServerSideProps({ req, res }) {
-   const { user_name } = getCookies({ req, res });
    const doc = await userAuth();
-   const sheet = doc.sheetsByTitle[user_name];
+   const sheet = await doc.sheetsByTitle['user_info'];
    const sheetRows = await sheet.getRows();
+   const usernames = sheetRows.map((e) => {
+      return e.username;
+   });
+   let userinfo = new Object();
+   for (let username of usernames) {
+      let usersheet = doc.sheetsByTitle[username];
+      let allRows = await usersheet.getRows();
+      userinfo[username] = new Array();
+      allRows.map((e) => {
+         userinfo[username].push(e._rawData);
+      });
+   }
    return {
       props: {
-         name: sheetRows[0]._rawData[0],
-         email: sheetRows[0]._rawData[1],
+         userinfo,
       },
    };
 }
